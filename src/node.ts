@@ -1,17 +1,17 @@
 namespace tyro {
+  
   export class Node extends tyro.Updatable {
-    _w: number = 0 // 宽度
-    _h: number = 0 // 高度
-    position: Vector = new Vector(0, 0)
-    scaleX: number = 1
-    scaleY: number = 1
     children: Node[] = []
-    opacity: number = 1
-    rotation: number = 0
-
     parent: Node|null = null
-
+    
+    private _width: number = 0 // 宽度
+    private _height: number = 0 // 高度
+    private _opacity: number = 1 // 透明度
+    private _rotation: number = 0 // 旋转角度
+    private _scaleX: number = 1 // x轴缩放值
+    private _scaleY: number = 1 // y轴缩放值
     private _update: Function
+    private _anchor: Vector = new Vector()
 
     constructor() {
       super();
@@ -27,6 +27,8 @@ namespace tyro {
     addChild(child: Node) {
       this.children.push(child);
       child.parent = this;
+      child._propertyChanged = child._propertyChanged || noop;
+      child._propertyChanged();
     }
 
     removeChild(child: Node) {
@@ -34,42 +36,76 @@ namespace tyro {
       if (index !== -1) {
         this.children.splice(index, 1);
         child.parent = null;
+        child._propertyChanged();
       }
     }
 
-    get x() {
-      return this.position.x;
+    setPosition(x: number, y: number) {
+      this.x = x;
+      this.y = y;
     }
 
+    get x(): number {
+      return this.position.x;
+    }
     set x(value: number) {
       this.position.x = value;
       this._propertyChanged();
     }
 
-    get y() {
+    get y(): number {
       return this.position.y;
     }
-
     set y(value: number) {
       this.position.y = value;
       this._propertyChanged();
     }
 
-    get width() {
-      return this._w;
+    get width(): number {
+      return this._width;
     }
-
     set width(value: number) {
-      this._w = value;
+      this._width = value;
       this._propertyChanged();
     }
 
-    get height() {
-      return this._h;
+    get height(): number {
+      return this._height;
+    }
+    set height(value: number) {
+      this._height = value;
+      this._propertyChanged();
     }
 
-    set height(value: number) {
-      this._h = value;
+    get opacity(): number {
+      return this._opacity;
+    }
+    set opacity(value: number) {
+      this._opacity = value;
+      this._propertyChanged();
+    }
+
+    get rotation(): number {
+      return this._rotation;
+    }
+    set rotation(value: number) {
+      this._rotation = value;
+      this._propertyChanged();
+    }
+
+    get scaleX(): number {
+      return this._scaleX;
+    }
+    set scaleX(value: number) {
+      this._scaleX = value;
+      this._propertyChanged();
+    }
+
+    get scaleY(): number {
+      return this._scaleY;
+    }
+    set scaleY(value: number) {
+      this._scaleY = value;
       this._propertyChanged();
     }
   }
