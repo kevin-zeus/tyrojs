@@ -4,6 +4,10 @@ namespace tyro {
 
     private id: string;
 
+    /**
+     * 
+     * @param name 场景名称，不同的场景名称必须唯一
+     */
     constructor(name: string) {
       super();
       this.name = name;
