@@ -3,36 +3,18 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "directories": {
-    "doc": "docs",
-    "example": "examples",
-    "lib": "lib"
-  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack"
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevin-zeus/tyrojs.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "@babel/core": "^7.15.8",
-    "@babel/plugin-transform-runtime": "^7.15.8",
-    "@babel/preset-env": "^7.15.8",
-    "@babel/preset-typescript": "^7.15.0",
-    "@rollup/plugin-commonjs": "^21.0.1",
-    "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^13.0.6",
-    "babel-loader": "^8.2.3",
-    "rollup": "^2.58.0",
-    "rollup-plugin-babel": "^4.4.0",
-    "ts-loader": "^9.2.6",
-    "tslib": "^2.3.1",
-    "typescript": "^4.4.4",
-    "webpack": "^5.60.0",
-    "webpack-cli": "^4.9.1"
+  "bugs": {
+    "url": "https://github.com/kevin-zeus/tyrojs/issues"
   },
-  "dependencies": {
-    "fetch-polyfill": "^0.8.2"
-  }
+  "homepage": "https://github.com/kevin-zeus/tyrojs#readme"
 }
