@@ -14,6 +14,6 @@ export default class CanvasMouseEvent extends CanvasInputEvent {
     super(type, altKey, ctrlKey, shiftKey);
     this.canvasPosition = canvasPos;
     this.button = button;
-    this.localPosition = new Vec2();
+    this.localPosition = Vec2.create();
   }
 }

@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "cross-env NODE_ENV=development webpack serve"
   },
   "repository": {
     "type": "git",
@@ -16,5 +17,19 @@
   "bugs": {
     "url": "https://github.com/kevin-zeus/tyrojs/issues"
   },
-  "homepage": "https://github.com/kevin-zeus/tyrojs#readme"
+  "homepage": "https://github.com/kevin-zeus/tyrojs#readme",
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/preset-env": "^7.16.0",
+    "cross-env": "^7.0.3",
+    "css-loader": "^6.5.0",
+    "html-webpack-plugin": "^5.5.0",
+    "less-loader": "^10.2.0",
+    "style-loader": "^3.3.1",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.4.4",
+    "webpack": "^5.61.0",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.4.0"
+  }
 }

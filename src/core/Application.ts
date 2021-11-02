@@ -8,6 +8,12 @@ export default class Application implements EventListenerObject {
   public isSupportMouseMove: boolean
 
   protected _isMouseDown: boolean
+  protected _start: boolean = false
+  protected _requestId: number = -1
+  protected _lastTime!: number
+  protected _startTime!: number
+
+  private _fps: number = 0
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -22,6 +28,14 @@ export default class Application implements EventListenerObject {
     this.isSupportMouseMove = false;
   }
 
+  public isRunning(): boolean {
+    return this._start;
+  }
+
+  public get fps(): number {
+    return this._fps;
+  }
+
   public handleEvent(evt: Event): void {
     switch(evt.type) {
       case 'mousedown':
@@ -30,7 +44,7 @@ export default class Application implements EventListenerObject {
         break;
       case 'mouseup':
         this._isMouseDown = false;
-        this.dispatchMouseDown(this._toCanvasMouseEvent(evt, EInputEventType.MOUSEUP));
+        this.dispatchMouseUp(this._toCanvasMouseEvent(evt, EInputEventType.MOUSEUP));
         break;
       case 'mousemove':
         if (this.isSupportMouseMove) {
@@ -54,9 +68,37 @@ export default class Application implements EventListenerObject {
     }
   }
 
-  public start(): void {}
+  public start(): void {
+    if (!this._start) {
+      this._start = true;
+      this._lastTime = -1;
+      this._startTime = -1;
+      this._requestId = requestAnimationFrame((msec: number): void => {
+        this.step(msec);
+      })
+    }
+  }
+
+  protected step(timeStamp: number): void {
+    if (this._startTime === -1) this._startTime = timeStamp;
+    if (this._lastTime === -1) this._lastTime = timeStamp;
+    let elapsedMsec = timeStamp - this._startTime;
+    let intervalSec = timeStamp - this._lastTime;
+    if (intervalSec !== 0) {
+      this._fps = 1000.0 / intervalSec;
+    }
+    intervalSec /= 1000.0;
+    this._lastTime = timeStamp;
+    this.update(elapsedMsec, intervalSec);
+    this.render();
+    requestAnimationFrame((elapsedMsec: number): void => {
+      this.step(elapsedMsec);
+    })
+  }
 
   public stop(): void {}
+
+  public update(elapsedMsec: number, intervalSec: number): void {}
 
   public render(): void {}
 
@@ -82,10 +124,39 @@ export default class Application implements EventListenerObject {
     if (!this.canvas) {
       throw new Error('canvas 不存在');
     }
+    if (!evt.target) {
+      throw new Error('evt.target 为null');
+    }
 
     let rect: DOMRect = this.canvas.getBoundingClientRect();
-    const x: number = evt.clientX - rect.left;
-    const y: number = evt.clientY - rect.top;
+    let borderLeftWidth: number = 0;
+    let borderTopWidth: number = 0;
+    let paddingLeft: number = 0;
+    let paddingTop: number = 0;
+    let decl: CSSStyleDeclaration = window.getComputedStyle(evt.target as HTMLElement);
+
+    let strNumber: string|null = decl.borderLeftWidth;
+    if (strNumber !== null) {
+      borderLeftWidth = parseInt(strNumber, 10);
+    }
+    strNumber = decl.borderTopWidth;
+    if (strNumber !== null) {
+      borderTopWidth = parseInt(strNumber, 10);
+    }
+    strNumber = decl.paddingLeft;
+    if (strNumber !== null) {
+      paddingLeft = parseInt(strNumber, 10);
+    }
+    strNumber = decl.paddingTop;
+    if (strNumber !== null) {
+      paddingTop = parseInt(strNumber, 10);
+    }
+
+    console.log('当前Canvas的rect', rect);
+    console.log(this.canvas.width);
+    console.log(this.canvas.height);
+    const x: number = evt.clientX - rect.left - borderLeftWidth - paddingLeft;
+    const y: number = evt.clientY - rect.top - borderTopWidth - paddingTop;
     return Vec2.create(x, y);
   }
   
