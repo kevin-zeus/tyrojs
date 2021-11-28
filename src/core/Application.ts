@@ -2,18 +2,21 @@ import EInputEventType from "../enums/EInputEventType";
 import CanvasKeyBoardEvent from "../event/CanvasKeyBoardEvent";
 import CanvasMouseEvent from "../event/CanvasMouseEvent";
 import Vec2 from "../math/Vec2";
+import Timer, { TimeCallback } from './Timer';
 
 export default class Application implements EventListenerObject {
   public canvas: HTMLCanvasElement
   public isSupportMouseMove: boolean
+  public timers: Timer[] = []
 
   protected _isMouseDown: boolean
   protected _start: boolean = false
-  protected _requestId: number = -1
+  protected _requestId: number = -1 
   protected _lastTime!: number
   protected _startTime!: number
 
   private _fps: number = 0
+  private _timeId: number = -1
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -89,6 +92,8 @@ export default class Application implements EventListenerObject {
     }
     intervalSec /= 1000.0;
     this._lastTime = timeStamp;
+
+    this._handleTimers(intervalSec);
     this.update(elapsedMsec, intervalSec);
     this.render();
     requestAnimationFrame((elapsedMsec: number): void => {
@@ -103,6 +108,63 @@ export default class Application implements EventListenerObject {
   public render(): void {}
 
   public showFPS(show: boolean): void {}
+
+  public removeTimer(id: number): boolean {
+    let found: boolean = false;
+    for (let i = 0; i < this.timers.length; i++) {
+      if (this.timers[i].id === id) {
+        let timer: Timer = this.timers[i];
+        timer.enabled = false;
+        found = true;
+        break;
+      }
+    }
+    return found;
+  }
+
+  public addTimer(callback: TimeCallback, timeout: number = 1.0, onlyOnce: boolean = false, data: any): number {
+    let timer: Timer;
+    for (let i = 0; i < this.timers.length; i++) {
+      timer = this.timers[i];
+      if (timer.enabled === false) {
+        timer.callback = callback;
+        timer.callbackData = data;
+        timer.timeout = timeout;
+        timer.countdown = timeout;
+        timer.enabled = true;
+        timer.onlyOnce = onlyOnce;
+        return timer.id;
+      }
+    }
+    // 不存在就new一个新的Timer
+    timer = new Timer(callback);
+    timer.callbackData = data;
+    timer.timeout = timeout;
+    timer.countdown = timeout;
+    timer.enabled = true;
+    timer.onlyOnce = onlyOnce;
+    timer.id = ++this._timeId;
+
+    this.timers.push(timer);
+    return timer.id;
+  }
+
+  private _handleTimers(intervalSec: number): void {
+    for (let i = 0; i < this.timers.length; i++) {
+      let timer: Timer = this.timers[i];
+      if (!timer.enabled) continue;
+
+      timer.countdown -= intervalSec;
+      if (timer.countdown < 0.0) {
+        timer.callback(timer.id, timer.callbackData);
+        if (timer.onlyOnce === false) {
+          timer.countdown = timer.timeout;
+        } else {
+          this.removeTimer(timer.id);
+        }
+      }
+    }
+  }
 
   private _toCanvasMouseEvent(evt: Event, type: EInputEventType): CanvasMouseEvent {
     let event: MouseEvent = evt as MouseEvent;
@@ -159,7 +221,7 @@ export default class Application implements EventListenerObject {
     const y: number = evt.clientY - rect.top - borderTopWidth - paddingTop;
     return Vec2.create(x, y);
   }
-  
+
   protected dispatchMouseDown(evt: CanvasMouseEvent): void {}
   protected dispatchMouseUp(evt: CanvasMouseEvent): void {} 
   protected dispatchMouseMove(evt: CanvasMouseEvent): void {}
