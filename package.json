@@ -33,6 +33,7 @@
     "webpack-dev-server": "^4.4.0"
   },
   "dependencies": {
+    "earcut": "^2.2.3",
     "eventemitter3": "^4.0.7",
     "howler": "^2.2.3"
   }
