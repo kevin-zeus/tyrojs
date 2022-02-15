@@ -1,3 +1,5 @@
+import Vector2d from "../math/Vector2d";
+
 export default class Event {
   /** 空 Event 对象，用于事件派发中转使用 */
   static EMPTY: Event = new Event();
@@ -10,4 +12,16 @@ export default class Event {
   static VISIBILITY_CHANGE: string = 'visibilitychange';
 
   type: string;
+  touchId: number;
+  nativeEvent: any;
+  target: any;
+  currentTarget: any;
+
+  get touches(): any[]|null {
+    if (!this.nativeEvent) return null;
+    let arr: any[] = this.nativeEvent.touches;
+    if (arr) {
+      let stage = 
+    }
+  }
 }

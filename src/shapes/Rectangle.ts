@@ -2,7 +2,7 @@ import Polygon from './Polygon';
 import Vector2d from '../math/Vector2d';
 import IPoolableClass from '../constants/IPoolableClass';
 
-class Rectangle extends Polygon implements IPoolableClass<Rectangle> {
+export default class Rectangle extends Polygon implements IPoolableClass<Rectangle> {
   className: string = 'tyro.Rectangle';
   pool: Rectangle[] = [];
 
