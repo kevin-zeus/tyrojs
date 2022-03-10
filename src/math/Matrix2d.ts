@@ -1,7 +1,12 @@
-import pool from "../system/pooling";
 import Vector2d from "./Vector2d";
+import Pool from "../utils/Pool";
 
+/**
+ * 2d 矩阵计算类
+ * @class Matrix2d
+ */
 class Matrix2d {
+  static EMPTY: Matrix2d = new Matrix2d();
   public val: Float32Array = new Float32Array(9);
 
     /**
@@ -17,16 +22,13 @@ class Matrix2d {
    * @param i m22
    * @returns 
    */
-  constructor(
-    a: number, b: number, c: number,
-    d: number, e: number, f: number,
-    g: number, h: number, i: number,
-  ) {
-    this.init(
-      a, b, c,
-      d, e, f,
-      g, h, i
-    )
+  constructor() {
+    this.reset()
+  }
+
+  reset(): Matrix2d {
+    this.val = new Float32Array(9);
+    return this;
   }
 
     /**
@@ -40,13 +42,13 @@ class Matrix2d {
    * @param g m02
    * @param h m12
    * @param i m22
-   * @returns 
+   * @returns this
    */
-  init(
+  set(
     a: number|Matrix2d, b?: number, c?: number,
     d?: number, e?: number, f?: number,
     g?: number, h?: number, i?: number,
-  ) {
+  ): Matrix2d {
     if (a instanceof Matrix2d) {
       this.copy(a);
     }
@@ -63,6 +65,7 @@ class Matrix2d {
         g, h, i
       )
     }
+    return this;
   }
 
   /**
@@ -349,8 +352,21 @@ class Matrix2d {
     );
   }
 
+  static create(): Matrix2d {
+    return Pool.getItemByClass('Matrix2d', Matrix2d);
+  }
+
   clone(): Matrix2d {
-    return pool.pull('tyro.Matrix2d', this);
+    return Matrix2d.create().set(
+      this.val[0], this.val[1], this.val[2],
+      this.val[3], this.val[4], this.val[5],
+      this.val[6], this.val[7], this.val[8],
+    )
+  }
+
+  recover(): void {
+    if (this === Matrix2d.EMPTY) return;
+    Pool.recover('Matrix2d', this.reset())
   }
 
   toArray(): Float32Array {

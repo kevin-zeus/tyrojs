@@ -1,6 +1,7 @@
 import Matrix2d from "../math/Matrix2d";
 import Vector2d from "../math/Vector2d";
 import Polygon from "../shapes/Polygon";
+import Pool from "../utils/Pool";
 
 interface IPos {
   x: number
@@ -8,24 +9,31 @@ interface IPos {
 }
 
 class Bounds {
+  static EMPTY: Bounds = new Bounds();
   public min: IPos = { x: Infinity, y: Infinity }; // 左上角的点
   public max: IPos = { x: -Infinity, y: -Infinity }; // 右下角的点
 
-  private _center: Vector2d = new Vector2d();
+  private _center: Vector2d = Vector2d.EMPTY;
 
-  constructor(vertices?: Vector2d[]) {
-    this.init(vertices);
+  constructor() {
+    this.reset();
+  }
+  
+  static create(): Bounds {
+    return Pool.getItemByClass('Bounds', Bounds);
   }
 
-  init(vertices?: Vector2d[]) {
-    this.clear();
+  reset(): Bounds {
+    this.setMinMax(Infinity, Infinity, -Infinity, -Infinity);
+    return this;
+  }
+
+  set(vertices?: Vector2d[]): Bounds {
+    this.reset();
     if (typeof vertices !== 'undefined') {
       this.update(vertices);
     }
-  }
-
-  clear() {
-    this.setMinMax(Infinity, Infinity, -Infinity, -Infinity);
+    return this;
   }
 
   setMinMax(minX: number, minY: number, maxX: number, maxY: number) {
@@ -97,6 +105,7 @@ class Bounds {
   }
 
   get center(): Vector2d {
+    this._center === Vector2d.EMPTY && (this._center = Vector2d.create())
     return this._center.set(this.centerX, this.centerY);
   }
 
@@ -106,7 +115,7 @@ class Bounds {
 
   add(vertices: Vector2d[], clear: boolean = false) {
     if (clear === true) {
-      this.clear();
+      this.reset();
     }
     for (let i=0; i < vertices.length; i++) {
       let vertex = vertices[i];
@@ -119,7 +128,7 @@ class Bounds {
 
   addBounds(bounds: Bounds, clear: boolean = false) {
     if (clear === true) {
-      this.clear();
+      this.reset();
     }
 
     if (bounds.max.x > this.max.x) this.max.x = bounds.max.x;
@@ -227,17 +236,15 @@ class Bounds {
   }
 
   clone() {
-    let bounds = new Bounds();
-    bounds.addBounds(this);
-    return bounds;
+    return Bounds.create().addBounds(this)
   }
 
   toPolygon() {
-    return new Polygon(this.x, this.y, [
-      new Vector2d(0, 0),
-      new Vector2d(this.width, 0),
-      new Vector2d(this.width, this.height),
-      new Vector2d(0, this.height),
+    return Polygon.create().set(this.x, this.y, [
+      Vector2d.create().set(0, 0),
+      Vector2d.create().set(this.width, 0),
+      Vector2d.create().set(this.width, this.height),
+      Vector2d.create().set(0, this.height),
     ])
   }
 }
