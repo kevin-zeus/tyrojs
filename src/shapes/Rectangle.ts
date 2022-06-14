@@ -1,9 +1,8 @@
 import Polygon from './Polygon';
 import Vector2d from '../math/Vector2d';
-import IPoolableClass from '../constants/IPoolableClass';
 
-class Rectangle extends Polygon implements IPoolableClass<Rectangle> {
-  className: string = 'tyro.Rectangle';
+export default class Rectangle extends Polygon {
+  static EMPTY: Rectangle = new Rectangle();
   pool: Rectangle[] = [];
 
   public shapeType: string = 'Rectangle';
@@ -15,20 +14,15 @@ class Rectangle extends Polygon implements IPoolableClass<Rectangle> {
    * @param w 矩形宽度
    * @param h 矩形高度
    */
-  constructor(x: number, y: number, w: number, h: number) {
-    super(x, y, [
-      new Vector2d(0, 0),
-      new Vector2d(w, 0),
-      new Vector2d(w, h),
-      new Vector2d(0, h)
-    ]);
+  constructor() {
+    super();
   }
 
   // init(x: number, y: number, w: number, h: number) {
-  //   this.setRectangle(x, y, w, h);
+  //   this.set(x, y, w, h);
   // }
 
-  setRectangle(x: number, y: number, w: number|Vector2d[], h: number): Rectangle {
+  set(x: number, y: number, w: number|Vector2d[], h: number): Rectangle {
     let points = w;
 
     this.pos.set(x, y);
@@ -119,10 +113,10 @@ class Rectangle extends Polygon implements IPoolableClass<Rectangle> {
   }
 
   clone(): Rectangle {
-    return new Rectangle(this.pos.x, this.pos.y, this.width, this.height);
+    return Rectangle.create().set(this.pos.x, this.pos.y, this.width, this.height);
   }
 
   copy(rect: Rectangle): Rectangle {
-    return this.setRectangle(rect.pos.x, rect.pos.y, rect.width, rect.height);
+    return this.set(rect.pos.x, rect.pos.y, rect.width, rect.height);
   }
 }

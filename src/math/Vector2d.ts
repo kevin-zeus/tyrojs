@@ -1,21 +1,36 @@
-import pool from '../system/pooling';
-import IPoolableClass from '../constants/IPoolableClass';
+import Pool from '../utils/Pool';
 import { clamp } from './math';
 
-class Vector2d implements IPoolableClass<Vector2d> {
-  className: string = 'tyro.Vector2d';
-  pool: Vector2d[] = [];
+class Vector2d {
+  static EMPTY: Vector2d = new Vector2d();
 
   public x: number = 0;
   public y: number = 0;
 
-  constructor(x?: number, y?: number) {
-    this.onResetEvent(x, y);
+  constructor() {
+    this.reset();
   }
 
-  onResetEvent(x: number = 0, y: number = 0): Vector2d {
-    this.x = x;
-    this.y = y;
+  /**
+   * 从对象池里面构造一个Vector2d对象
+   * @returns Vector2d对象
+   */
+  static create(): Vector2d {
+    return Pool.getItemByClass('Vector2d', Vector2d)
+  }
+
+  /**
+   * 回收该对象
+   * @returns 
+   */
+  recover(): void {
+    if (this === Vector2d.EMPTY) return;
+    Pool.recover('Vector2d', this.reset());
+  }
+
+  reset(): Vector2d {
+    this.x = 0;
+    this.y = 0;
     return this;
   }
 
@@ -83,7 +98,7 @@ class Vector2d implements IPoolableClass<Vector2d> {
    * @returns 
    */
   clamp(low: number, high: number): Vector2d {
-    return new Vector2d(clamp(this.x, low, high), clamp(this.y, low, high));
+    return Vector2d.create().set(clamp(this.x, low, high), clamp(this.y, low, high));
   }
 
   /**
@@ -119,7 +134,7 @@ class Vector2d implements IPoolableClass<Vector2d> {
    * @returns 
    */
   floor(): Vector2d {
-    return new Vector2d(Math.floor(this.x), Math.floor(this.y));
+    return Vector2d.create().set(Math.floor(this.x), Math.floor(this.y));
   }
 
   /**
@@ -135,7 +150,7 @@ class Vector2d implements IPoolableClass<Vector2d> {
    * @returns 
    */
   ceil(): Vector2d {
-    return new Vector2d(Math.ceil(this.x), Math.ceil(this.y));
+    return Vector2d.create().set(Math.ceil(this.x), Math.ceil(this.y));
   }
 
   /**
@@ -150,7 +165,7 @@ class Vector2d implements IPoolableClass<Vector2d> {
    * 获得一个新的取负向量
    */
   negate(): Vector2d {
-    return new Vector2d(-this.x, -this.y);
+    return Vector2d.create().set(-this.x, -this.y);
   }
 
   /**
@@ -272,7 +287,7 @@ class Vector2d implements IPoolableClass<Vector2d> {
    * @returns 
    */
   clone() {
-    return pool.pull('tyro.Vector2d', this.x, this.y);
+    return Vector2d.create().set(this.x, this.y);
   }
 
   toString() {

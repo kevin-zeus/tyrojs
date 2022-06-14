@@ -1,36 +1,48 @@
 import Vector2d from '../math/Vector2d';
-import pool from '../system/pooling';
-import IPoolableClass from '../constants/IPoolableClass';
 import Matrix2d from '../math/Matrix2d';
 import Bounds from '../physics/Bounds';
+import Pool from '../utils/Pool';
 
-class Polygon implements IPoolableClass<Polygon> {
-  className: string = 'tyro.Polygon';
-  pool: Polygon[] = [];
-
-  // 坐标
-  public pos: Vector2d = new Vector2d();
-  // 顶点
-  public points: Vector2d[] = [];
-  // 边
-  public edges: Vector2d[] = [];
-  // 构成多边形的三角形顶点
-  public indices: Vector2d[] = [];
-  // 法线
-  public normals: Array<any> = [];
+class Polygon {
+  static EMPTY: Polygon = new Polygon()
   public shapeType: string = 'Polygon';
 
-  private _bounds: any;
+  /** 坐标 */
+  public pos: Vector2d = Vector2d.EMPTY;
+  /** 顶点 */
+  public points: Vector2d[] = [];
+  /** 边 */
+  public edges: Vector2d[] = [];
+  /** 构成多边形的三角形顶点 */
+  public indices: Vector2d[] = [];
+  /** 法线 */
+  public normals: Array<any> = [];
+  /** 矩形包围盒 */
+  private _bounds: Bounds = new Bounds(); 
 
-  constructor(x: number, y: number, points: Vector2d[]|number[]) {
-    this.setPolygon(x, y, points);
+  constructor() {
+    this.reset();
   }
 
-  onResetEvent(x: number, y: number, points: Vector2d[]|number[]) {
-    this.setPolygon(x, y, points)
+  static create() {
+    return Pool.getItemByClass('Polygon', Polygon);
   }
 
-  setPolygon(x: number, y: number, points: Vector2d[]|number[]): Polygon {
+  recover() {
+    if (this === Polygon.EMPTY) return;
+    Pool.recover('Polygon', this.reset());
+  }
+
+  reset(): Polygon {
+    this.pos = Vector2d.create();
+    this.points = [];
+    this.edges = [];
+    this.indices = [];
+    this._bounds = new Bounds();
+    return this;
+  }
+
+  set(x: number, y: number, points: Vector2d[]|number[]): Polygon {
     this.pos.set(x, y);
     this.setVertices(points);
     return this;
@@ -52,13 +64,13 @@ class Polygon implements IPoolableClass<Polygon> {
       // 如果传入的是 Vector2d[]
       if (typeof vertices[0] === 'object') {
         vertices.forEach((vertice) => {
-          this.points.push(new Vector2d((vertice as Vector2d).x, (vertice as Vector2d).y));
+          this.points.push(Vector2d.create().set((vertice as Vector2d).x, (vertice as Vector2d).y));
         });
       }
       // 如果是 number[]，如 [1, 2, 3, 4]
       else {
         for (let p=0; p < vertices.length; p += 2) {
-          this.points.push(new Vector2d(vertices[p] as number, vertices[p + 1] as number));
+          this.points.push(Vector2d.create().set(vertices[p] as number, vertices[p + 1] as number));
         }
       }
     }
@@ -241,9 +253,7 @@ class Polygon implements IPoolableClass<Polygon> {
    * @returns 
    */
   getBounds(): Bounds {
-    if (typeof this._bounds === 'undefined') {
-      this._bounds = pool.pull('tyro.Bounds');
-    }
+    if (this._bounds === Bounds.EMPTY) this._bounds = Bounds.create()
     return this._bounds;
   }
 
